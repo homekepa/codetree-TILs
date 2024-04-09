@@ -11,7 +11,7 @@ int map[10][10];
 int when_attack[10][10] = { 0 }, isattack[10][10] = {0};
 //우/하/좌/상의 우선순위대
 int dy[] = { 0,1,0,-1 }, dx[] = { 1,0,-1,0 };
-int dy_8[] = { 0,1,1,1,0,-1,-1,-1 }, dx_8[] = { -1,-1,0,1,1,1,0,-1 };
+int dy_8[] = { -1,-1,0,1,1,1,0,-1 }, dx_8[] = { 0,1,1,1,0,-1,-1,-1 };
 struct point {
 	int y, x;
 };
@@ -21,11 +21,11 @@ bool cmp(point a, point b) {
 	if (map[a.y][a.x] == map[b.y][b.x]) {
 		if (when_attack[a.y][a.x] == when_attack[b.y][b.x]) {
 			if (a.y + a.x == b.y + b.x) {
-				return a.x > b.x;
+				return a.x < b.x;
 			}
-			return a.y + a.x > b.y + b.x;
+			return a.y + a.x < b.y + b.x;
 		}
-		return when_attack[a.y][a.x] > when_attack[b.y][b.x];
+		return when_attack[a.y][a.x] < when_attack[b.y][b.x];
 	}
 	return map[a.y][a.x] < map[b.y][b.x];
 }
@@ -129,7 +129,7 @@ int main() {
 				isattack[ny][nx] = 1;
 				if (map[ny][nx] < 0) map[ny][nx] = 0;
 			}
-		}
+		} 
 		for (int i = 0; i < N; i++)
 		{
 			for (int j = 0; j < M; j++)
@@ -140,7 +140,8 @@ int main() {
 			}
 		}
 		max = sorted();
-		if (turret.size() == 1) break;
+		if (turret.size() == 1) 
+			break;
 	}
 
 	cout << max;
