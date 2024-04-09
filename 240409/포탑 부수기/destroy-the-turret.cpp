@@ -8,10 +8,10 @@ using namespace std;
 
 int N, M, K;
 int map[10][10];
-int when_attack[10][10] = {0};
+int when_attack[10][10] = { 0 };
 //우/하/좌/상의 우선순위대
-int dy[] = {0,1,0,-1}, dx[] = {1,0,-1,0};
-int dy_8[] = {0,1,1,1,0,-1,-1,-1}, dx_8[] = {-1,-1,0,1,1,1,0,-1};
+int dy[] = { 0,1,0,-1 }, dx[] = { 1,0,-1,0 };
+int dy_8[] = { 0,1,1,1,0,-1,-1,-1 }, dx_8[] = { -1,-1,0,1,1,1,0,-1 };
 struct point {
 	int y, x;
 };
@@ -19,11 +19,11 @@ vector<point>turret;
 int path_map[10][10] = { 0 };
 bool cmp(point a, point b) {
 	if (map[a.y][a.x] == map[b.y][b.x]) {
-		if (when_attack[a.y][a.x] == when_attack[b.y][b.x]){
+		if (when_attack[a.y][a.x] == when_attack[b.y][b.x]) {
 			if (a.y + a.x == b.y + b.x) {
 				return a.x > b.x;
 			}
-		return a.y + a.x > b.y + b.x;
+			return a.y + a.x > b.y + b.x;
 		}
 		return when_attack[a.y][a.x] > when_attack[b.y][b.x];
 	}
@@ -38,7 +38,7 @@ void input() {
 			cin >> map[i][j];
 		}
 	}
-	
+
 }
 
 int sorted() {
@@ -76,8 +76,8 @@ bool laser_valid() {
 
 			if (map[ny][nx] == 0) continue;
 			if (path_map[ny][nx] != -1)continue;
-			path_map[ny][nx] = (i+2)%4;
-			q.push({ny, nx});
+			path_map[ny][nx] = (i + 2) % 4;
+			q.push({ ny, nx });
 		}
 	}
 	return false;
@@ -90,6 +90,7 @@ int main() {
 	for (int i = 1; i <= K; i++)
 	{
 		map[turret.front().y][turret.front().x] += N + M;
+		when_attack[turret.front().y][turret.front().x]++;
 		int dmg = map[turret.front().y][turret.front().x];
 		if (laser_valid()) {
 			point end = turret.back();
@@ -120,6 +121,15 @@ int main() {
 
 				map[ny][nx] -= dmg / 2;
 				if (map[ny][nx] < 0) map[ny][nx] = 0;
+			}
+		}
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < M; j++)
+			{
+				if (map[i][j] != 0 && (i != turret.front().y && j != turret.front().x)) {
+					map[i][j]++;
+				}
 			}
 		}
 		max = sorted();
