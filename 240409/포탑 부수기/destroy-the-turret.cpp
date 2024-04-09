@@ -140,6 +140,7 @@ int main() {
 			}
 		}
 		max = sorted();
+		if (turret.size() <= 1) break;
 	}
 
 	cout << max;
