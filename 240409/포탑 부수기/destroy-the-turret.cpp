@@ -21,9 +21,9 @@ bool cmp(point a, point b) {
 	if (map[a.y][a.x] == map[b.y][b.x]) {
 		if (when_attack[a.y][a.x] == when_attack[b.y][b.x]) {
 			if (a.y + a.x == b.y + b.x) {
-				return a.x > b.x;
+				return a.x < b.x;
 			}
-			return a.y + a.x > b.y + b.x;
+			return a.y + a.x < b.y + b.x;
 		}
 		return when_attack[a.y][a.x] > when_attack[b.y][b.x];
 	}
@@ -140,6 +140,8 @@ int main() {
 		}
 		max = sorted();
 	}
+
+
 	cout << max;
 	return 0;
 }
