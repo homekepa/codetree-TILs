@@ -71,8 +71,8 @@ bool laser_valid() {
 
 		for (int i = 0; i < 4; i++)
 		{
-			int ny = (now.y + dy[i]) % N;
-			int nx = (now.x + dx[i]) % M;
+			int ny = (now.y + dy[i]+N) % N;
+			int nx = (now.x + dx[i]+M) % M;
 
 			if (map[ny][nx] == 0) continue;
 			if (path_map[ny][nx] != -1)continue;
@@ -101,8 +101,8 @@ int main() {
 			if (map[end.y][end.x] < 0) map[end.y][end.x] = 0;
 			while (1) {
 				int dir = path_map[end.y][end.x];
-				end.y += dy[dir];
-				end.x += dx[dir];
+				end.y = (end.y + dy[dir]+N) % N;
+				end.x = (end.x + dx[dir]+M) % M;
 				if (end.y == turret.front().y && end.x == turret.front().x)break;
 				map[end.y][end.x] -= dmg / 2;
 				isattack[end.y][end.x] = 1;
@@ -117,8 +117,8 @@ int main() {
 			if (map[tar.y][tar.x] < 0) map[tar.y][tar.x] = 0;
 			for (int i = 0; i < 8; i++)
 			{
-				int ny = (tar.y + dy[i]) % N;
-				int nx = (tar.x + dx[i]) % M;
+				int ny = (tar.y + dy[i]+N) % N;
+				int nx = (tar.x + dx[i]+M) % M;
 				if (ny == turret.front().y && nx == turret.front().x) {
 					continue;
 				}
