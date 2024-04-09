@@ -87,7 +87,8 @@ int main() {
 	int max;
 	input();
 	sorted();
-	for (int i = 1; i <= K; i++)
+
+	for (int t = 1; t <= K; t++)
 	{
 		memset(isattack, 0, sizeof(isattack));
 		map[turret.front().y][turret.front().x] += N + M;
