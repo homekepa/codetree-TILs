@@ -117,8 +117,8 @@ int main() {
 			if (map[tar.y][tar.x] < 0) map[tar.y][tar.x] = 0;
 			for (int i = 0; i < 8; i++)
 			{
-				int ny = (tar.y + dy[i]+N) % N;
-				int nx = (tar.x + dx[i]+M) % M;
+				int ny = (tar.y + dy_8[i]+N) % N;
+				int nx = (tar.x + dx_8[i]+M) % M;
 				if (ny == turret.front().y && nx == turret.front().x) {
 					continue;
 				}
