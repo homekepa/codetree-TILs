@@ -8,7 +8,7 @@ using namespace std;
 
 int N, M, K;
 int map[10][10];
-int when_attack[10][10] = { 0 };
+int when_attack[10][10] = { 0 }, isattack[10][10] = {0};
 //우/하/좌/상의 우선순위대
 int dy[] = { 0,1,0,-1 }, dx[] = { 1,0,-1,0 };
 int dy_8[] = { 0,1,1,1,0,-1,-1,-1 }, dx_8[] = { -1,-1,0,1,1,1,0,-1 };
@@ -89,12 +89,15 @@ int main() {
 	sorted();
 	for (int i = 1; i <= K; i++)
 	{
+
 		map[turret.front().y][turret.front().x] += N + M;
+		isattack[turret.front().y][turret.front().x] = 1;
 		when_attack[turret.front().y][turret.front().x]++;
 		int dmg = map[turret.front().y][turret.front().x];
 		if (laser_valid()) {
 			point end = turret.back();
 			map[end.y][end.x] -= dmg;
+			isattack[end.y][end.x] = 1;
 			if (map[end.y][end.x] < 0) map[end.y][end.x] = 0;
 			while (1) {
 				int dir = path_map[end.y][end.x];
@@ -102,6 +105,7 @@ int main() {
 				end.x += dx[dir];
 				if (end.y == turret.front().y && end.x == turret.front().x)break;
 				map[end.y][end.x] -= dmg / 2;
+				isattack[end.y][end.x] = 1;
 				if (map[end.y][end.x] < 0) map[end.y][end.x] = 0;
 			}
 		}
@@ -109,6 +113,7 @@ int main() {
 		else {
 			point tar = turret.back();
 			map[tar.y][tar.x] -= dmg;
+			isattack[tar.y][tar.x] = 1;
 			if (map[tar.y][tar.x] < 0) map[tar.y][tar.x] = 0;
 			for (int i = 0; i < 8; i++)
 			{
@@ -120,6 +125,7 @@ int main() {
 				if (map[ny][nx] == 0)continue;
 
 				map[ny][nx] -= dmg / 2;
+				isattack[ny][nx] = 1;
 				if (map[ny][nx] < 0) map[ny][nx] = 0;
 			}
 		}
@@ -127,7 +133,7 @@ int main() {
 		{
 			for (int j = 0; j < M; j++)
 			{
-				if (map[i][j] != 0 && (i != turret.front().y && j != turret.front().x)) {
+				if (map[i][j] != 0 && isattack[i][j] != 1) {
 					map[i][j]++;
 				}
 			}
