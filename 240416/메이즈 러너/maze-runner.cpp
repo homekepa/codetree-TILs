@@ -1,185 +1,149 @@
-#include<iostream>
-#include<vector>
-#include<queue>
-#include<cmath>
-#include<climits>
-#define MAX INT_MAX
+#include <iostream>
+
 using namespace std;
 
-int map[11][11];
-int dy[4] = { -1,1,0,0 };
-int dx[4] = { 0,0,1,-1 };
-int N, M, K;
-int exit_y, exit_x;
-int out_cnt;
-struct Info {
-    int y, x, score;
-    bool isOut;
-};
+int n, m, k;
+int board[11][11];
+int next_board[11][11];
+pair<int, int> traveler[11];
+pair<int, int> exits;
+int ans;
+int sx, sy, square_size;
 
-struct Info2 {
-    int y, x, dist;
-};
+// 모든 참가자를 이동시킵니다.
+void MoveAllTraveler() {
+    for (int i = 1; i <= m; i++) {
+        if (traveler[i].first == exits.first && traveler[i].second == exits.second)
+            continue;
+        if (traveler[i].first != exits.first) {
+            int nx = traveler[i].first;
+            int ny = traveler[i].second;
 
-struct Cmp {
-    bool operator()(Info2 a, Info2 b) {
-        if (a.dist != b.dist) {
-            return a.dist > b.dist;
-        }
-        else {
-            if (a.y != b.y) {
-                return a.y > b.y;
-            }
-            else {
-                return a.x > b.x;
+            if (exits.first > nx) nx++;
+            else nx--;
+            if (!board[nx][ny]) {
+                traveler[i].first = nx;
+                traveler[i].second = ny;
+                ans++;
+                continue;
             }
         }
-    }
-};
+        if (traveler[i].second != exits.second) {
+            int nx = traveler[i].first;
+            int ny = traveler[i].second;
 
-vector<Info>Players;
-void input() {
-    for (int i = 1; i <= N; i++) {
-        for (int j = 1; j <= N; j++) {
-            cin >> map[i][j];
+            if (exits.second > ny) ny++;
+            else ny--;
+            if (!board[nx][ny]) {
+                traveler[i].first = nx;
+                traveler[i].second = ny;
+                ans++;
+                continue;
+            }
         }
     }
-    int y, x;
-    Players.push_back({ 0,0,0,true });
-    for (int i = 1; i <= M; i++) {
-        cin >> y >> x;
-        Players.push_back({ y,x,0,false });
-    }
-    cin >> exit_y >> exit_x;
-    map[exit_y][exit_x] = -1;
 }
 
-bool isValid(int y, int x) {
-    return y >= 1 && x >= 1 && y <= N && x <= N && (map[y][x] == -1 || map[y][x] == 0);
-}
 
-bool movePlayers() {
+void FindMinimumSquare() {
+    for (int sz = 2; sz <= n; sz++) {
+        for (int x1 = 1; x1 <= n - sz + 1; x1++) {
+            for (int y1 = 1; y1 <= n - sz + 1; y1++) {
+                int x2 = x1 + sz - 1;
+                int y2 = y1 + sz - 1;
 
-
-    for (int i = 1; i < Players.size(); i++) {
-        if (Players[i].isOut)continue;
-        int cur_y = Players[i].y;
-        int cur_x = Players[i].x;
-
-        int cur_distance = abs(cur_y - exit_y) + abs(cur_x - exit_x);
-        for (int j = 0; j < 4; j++) {
-            int next_y = cur_y + dy[j];
-            int next_x = cur_x + dx[j];
-            if (!isValid(next_y, next_x))continue;
-
-            int next_distance = abs(next_y - exit_y) + abs(next_x - exit_x);
-
-            if (next_distance >= cur_distance)continue;
-            else {
-                Players[i].score++;
-
-                if (next_distance == 0) {
-                    out_cnt++;
-                    Players[i].isOut = true;
-                    if (out_cnt == M)return false;
+                if (!(x1 <= exits.first && exits.first <= x2 && y1 <= exits.second && exits.second <= y2)) {
+                    continue;
                 }
-                else {
-                    Players[i].y = next_y;
-                    Players[i].x = next_x;
+                bool is_traveler_in = false;
+                for (int l = 1; l <= m; l++) {
+                    if (x1 <= traveler[l].first && traveler[l].first <= x2 && y1 <= traveler[l].second && traveler[l].second <= y2) {
+                        if (!(traveler[l].first == exits.first && traveler[l].second == exits.second)) {
+                            is_traveler_in = true;
+                        }
+                    }
                 }
+                if (is_traveler_in) {
+                    sx = x1;
+                    sy = y1;
+                    square_size = sz;
 
-                break;
-            }
-
-        }
-    }
-    return true;
-}
-
-priority_queue<Info2, vector<Info2>, Cmp> calAlldis() {
-    priority_queue<Info2, vector<Info2>, Cmp>pq;
-
-    for (int i = 1; i < Players.size(); i++) {
-        if (Players[i].isOut)continue;
-        int dis_y = abs(Players[i].y - exit_y);
-        int dis_x = abs(Players[i].x - exit_x);
-        int dis = max(dis_y, dis_x);
-
-        int r = max(Players[i].y, exit_y) - dis;
-        int c = max(Players[i].x, exit_x) - dis;
-        if (r < 1)r = 1;
-        if (c < 1)c = 1;
-        pq.push({ r,c,dis });
-
-    }
-    return pq;
-}
-
-void rotateMap() {
-
-    priority_queue<Info2, vector<Info2>, Cmp>pq = calAlldis();
-    Info2 rotPlayer = pq.top();
-    int r = rotPlayer.y;
-    int c = rotPlayer.x;
-    int dis = rotPlayer.dist;
-    vector<int> c_pmap[11][11];
-    for (int i = 1; i < Players.size(); i++) {
-        if (Players[i].isOut)continue;
-        int y = Players[i].y;
-        int x = Players[i].x;
-        c_pmap[y][x].push_back(i);
-    }
-
-    int c_map[11][11] = { 0, };
-    for (int i = 1; i <= N; i++) {
-        for (int j = 1; j <= N; j++) {
-            c_map[i][j] = map[i][j];
-        }
-    }
-
-    int rot_x = c + dis;
-    for (int i = r; i <= r + dis; i++) {
-        int rot_y = r;
-        for (int j = c; j <= c + dis; j++) {
-            if (c_map[i][j] > 0)c_map[i][j]--;
-            map[rot_y][rot_x] = c_map[i][j];
-
-            if (!c_pmap[i][j].empty()) {
-                for (auto p : c_pmap[i][j]) {
-                    int player_num = p;
-                    Players[player_num].y = rot_y;
-                    Players[player_num].x = rot_x;
+                    return;
                 }
             }
-
-            if (map[rot_y][rot_x] == -1) {
-                exit_y = rot_y;
-                exit_x = rot_x;
-            }
-            rot_y++;
         }
-        rot_x--;
+    }
+}
+
+// 정사각형 내부의 벽을 회전시킵니다.
+void RotateSquare() {
+    for (int x = sx; x < sx + square_size; x++)
+        for (int y = sy; y < sy + square_size; y++) {
+            if (board[x][y]) board[x][y]--;
+        }
+    for (int x = sx; x < sx + square_size; x++)
+        for (int y = sy; y < sy + square_size; y++) {
+            int ox = x - sx, oy = y - sy;
+            int rx = oy, ry = square_size - ox - 1;
+            next_board[rx + sx][ry + sy] = board[x][y];
+        }
+    for (int x = sx; x < sx + square_size; x++)
+        for (int y = sy; y < sy + square_size; y++) {
+            board[x][y] = next_board[x][y];
+        }
+}
+
+//플레이어 회전
+void RotateTravelerAndExit() {
+    for (int i = 1; i <= m; i++) {
+        int x = traveler[i].first;
+        int y = traveler[i].second;
+        //플레이어 회전
+        if (sx <= x && x < sx + square_size && sy <= y && y < sy + square_size) {
+            int ox = x - sx, oy = y - sy;
+            int rx = oy, ry = square_size - ox - 1;
+            traveler[i] = make_pair(rx + sx, ry + sy);
+        }
     }
 
-
+    // 출구 회전
+    int x = exits.first;
+    int y = exits.second;
+    if (sx <= x && x < sx + square_size && sy <= y && y < sy + square_size) {
+        int ox = x - sx, oy = y - sy;
+        int rx = oy, ry = square_size - ox - 1;
+        exits = make_pair(rx + sx, ry + sy);
+    }
 }
 
 int main() {
-    cin >> N >> M >> K;
-    input();
-    for (int i = 0; i < K; i++) {
-        if (movePlayers()) {
-            rotateMap();
-        }
-        else {
-            break;
-        }
+    cin >> n >> m >> k;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            cin >> board[i][j];
+
+    for (int i = 1; i <= m; i++) {
+        cin >> traveler[i].first;
+        cin >> traveler[i].second;
     }
-    int ans = 0;
-    for (int i = 1; i <= M; i++) {
-        ans += Players[i].score;
+
+    cin >> exits.first;
+    cin >> exits.second;
+
+    while (k--) {
+        MoveAllTraveler();
+        bool is_all_escaped = true;
+        for (int i = 1; i <= m; i++) {
+            if (!(traveler[i].first == exits.first && traveler[i].second == exits.second)) {
+                is_all_escaped = false;
+            }
+        }
+        if (is_all_escaped) break;
+        FindMinimumSquare();
+        RotateSquare();
+        RotateTravelerAndExit();
     }
+
     cout << ans << "\n";
-    cout << exit_y << " " << exit_x;
-    return 0;
+    cout << exits.first << " " << exits.second;
 }
